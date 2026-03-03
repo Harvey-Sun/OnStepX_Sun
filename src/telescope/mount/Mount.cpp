@@ -19,6 +19,7 @@
 #include "pec/Pec.h"
 #include "site/Site.h"
 #include "st4/St4.h"
+#include "buttonPanel/ButtonPanel.h"
 #include "status/Status.h"
 
 #if MOUNT_COORDS_MEMORY == ON && NV_ENDURANCE < NVE_VHIGH
@@ -101,6 +102,10 @@ void Mount::begin() {
 
   #if ST4_INTERFACE == ON
     st4.init();
+  #endif
+
+  #if BUTTON_PANEL == ON
+    buttonPanel.init();
   #endif
 
   tracking(false);

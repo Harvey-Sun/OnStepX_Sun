@@ -750,6 +750,20 @@
 #define ST4_HAND_CONTROL_FOCUSER      OFF
 #endif
 
+// button panel
+#ifndef BUTTON_PANEL
+#define BUTTON_PANEL                  OFF
+#endif
+#ifndef BUTTON_PANEL_FINE_RATE
+#define BUTTON_PANEL_FINE_RATE        GR_1X
+#endif
+#ifndef BUTTON_PANEL_FAST_RATE
+#define BUTTON_PANEL_FAST_RATE        GR_48X
+#endif
+#ifndef BUTTON_PANEL_LONG_PRESS_MS
+#define BUTTON_PANEL_LONG_PRESS_MS    2000
+#endif
+
 // park
 #ifndef PARK_SENSE
 #define PARK_SENSE                    OFF

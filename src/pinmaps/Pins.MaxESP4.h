@@ -145,6 +145,24 @@
 #define ST4_DEC_N_PIN           33               // ST4 DE+ North
 #define ST4_RA_E_PIN            35               // [input only 35] ST4 RA+ East
 
+// Button Panel interface (direction + home/speed buttons)
+// Note: GPIO 34,35 are input-only and need external 10kΩ pull-up resistors
+#ifndef BTN_NORTH_PIN
+  #define BTN_NORTH_PIN         35               // [input only 35] Direction North
+#endif
+#ifndef BTN_SOUTH_PIN
+  #define BTN_SOUTH_PIN         34               // [input only 34] Direction South
+#endif
+#ifndef BTN_EAST_PIN
+  #define BTN_EAST_PIN          32               // Direction East
+#endif
+#ifndef BTN_WEST_PIN
+  #define BTN_WEST_PIN          33               // Direction West
+#endif
+#ifndef BTN_HOME_PIN
+  #define BTN_HOME_PIN          25               // Home/Speed toggle
+#endif
+
 #else
 #error "Wrong processor for this configuration!"
 
