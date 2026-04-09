@@ -20,7 +20,7 @@
   #define SERIAL_TMC_HARDWARE_UART
   #define SERIAL_TMC            Serial1          // Use a single hardware serial port to up to four drivers
   #define SERIAL_TMC_BAUD       460800           // Baud rate
-  #define SERIAL_TMC_RX         39               // Recieving data
+  #define SERIAL_TMC_RX         25               // Recieving data
   #ifndef SERIAL_TMC_TX
     #define SERIAL_TMC_TX       4                // Transmit data
   #endif
@@ -30,13 +30,13 @@
 // Uses default ESP32 I2C GPIO21 (SDA) and GPIO22 (SCL)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
-#define AUX2_PIN                39               // M3 pin TMC UART RX
-#define AUX3_PIN                14               // Home SW for Axis1
-#define AUX4_PIN                13               // Home SW for Axis2
+#define AUX2_PIN                23               // M3 pin TMC UART RX
+#define AUX3_PIN                17               // Home SW for Axis1
+#define AUX4_PIN                17               // Home SW for Axis2
 #define AUX5_PIN                1                // TX0 main USB, etc.
 #define AUX6_PIN                3                // RX0 main USB, etc.
 #define AUX7_PIN                23               // Limit SW, PPS, etc.
-#define AUX8_PIN                25               // 1-Wire, Status LED, Reticle LED, Tone, etc.
+#define AUX8_PIN                16               // 1-Wire, Status LED, Reticle LED, Tone, etc.
 
 // Misc. pins
 #ifndef ONE_WIRE_PIN
@@ -91,8 +91,8 @@
 #define AXIS1_M1_PIN            OFF              // hardwired for TMC UART address 0
 #define AXIS1_M2_PIN            OFF              // UART TX
 #define AXIS1_M3_PIN            OFF              // UART RX
-#define AXIS1_STEP_PIN          18
-#define AXIS1_DIR_PIN           0                // [must be high at boot 0]
+#define AXIS1_STEP_PIN          19
+#define AXIS1_DIR_PIN           18                // [must be high at boot 0]
 #ifndef AXIS1_SENSE_HOME_PIN
   #define AXIS1_SENSE_HOME_PIN  AUX3_PIN
 #endif

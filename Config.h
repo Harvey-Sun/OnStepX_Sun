@@ -161,8 +161,8 @@
                                           //         During goto btn press: aborts slew or continue meridian flip pause home
 #define ST4_HAND_CONTROL               ON //     ON, ON for hand controller special features and SHC support.                 Option
                                           //         Hold [E]+[W] btns >2s: Guide rate   [E]-  [W]+  [N] trk on/off [S] sync
-                                          //         Hold [N]+[S] btns >2s: Usr cat item [E]-  [W]+  [N] goto [S] snd on/off
-#define ST4_HAND_CONTROL_FOCUSER       ON //     ON, ON alternate to above: Focuser move [E]f1 [W]f2 [N]-     [S]+            Option
+                                          //         Hold [N]+[S] btns >2s: Request home (go home)
+#define ST4_HAND_CONTROL_FOCUSER       ON //     ON, ON (unused) formerly alternate to the old [N]+[S] mode B behavior.       Option
 
 // BUTTON PANEL ----------------------------------------- Independent direction buttons + home/speed toggle button
 #define BUTTON_PANEL                   ON //    OFF, ON enables independent button panel (direction + home/speed).          Option

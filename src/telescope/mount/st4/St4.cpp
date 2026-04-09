@@ -11,6 +11,7 @@
 #include "../Mount.h"
 #include "../guide/Guide.h"
 #include "../goto/Goto.h"
+#include "../home/Home.h"
 #include "../status/Status.h"
 
 #if ST4_INTERFACE == ON
@@ -111,24 +112,32 @@
       if (st4Axis1Rev.isDown() && st4Axis1Fwd.isDown()) guide.stopAxis1();
       if (st4Axis2Fwd.isDown() && st4Axis2Rev.isDown()) guide.stopAxis2();
   
+      // hold N+S to request home (replaces former altModeB)
+      const long HomeCombo_ms = 2000;
+      static bool homeComboTriggered = false;
+      if (!homeComboTriggered && st4Axis2Fwd.timeDown() > HomeCombo_ms && st4Axis2Rev.timeDown() > HomeCombo_ms) {
+        if (goTo.state == GS_NONE && !goTo.isHomePaused()) {
+          CommandError e = home.request();
+          if (e == CE_NONE) mountStatus.soundBeep(); else mountStatus.soundAlert();
+        }
+        homeComboTriggered = true;
+      }
+      if (st4Axis2Fwd.isUp() || st4Axis2Rev.isUp()) homeComboTriggered = false;
+
       // see if a combination was down for long enough for an alternate mode
       static bool altModeA = false;
-      static bool altModeB = false;
 
       #if GOTO_FEATURE == ON
         const long AltMode_ms = 2000;
         if (goTo.state == GS_NONE && !goTo.isHomePaused()) {
-          if (st4Axis1Rev.timeDown() > AltMode_ms && st4Axis1Fwd.timeDown() > AltMode_ms && !altModeB) {
+          if (st4Axis1Rev.timeDown() > AltMode_ms && st4Axis1Fwd.timeDown() > AltMode_ms) {
             if (!altModeA) { altModeA = true; mountStatus.soundBeep(); }
-          }
-          if (st4Axis2Fwd.timeDown() > AltMode_ms && st4Axis2Rev.timeDown() > AltMode_ms && !altModeA) {
-            if (!altModeB) { altModeB = true; mountStatus.soundBeep(); }
           }
         }
       #endif
 
       // if the alternate mode is allowed & selected & hasn't timed out, handle it
-      if ( (altModeA || altModeB) && (st4Axis2Fwd.timeUp() < Shed_ms || st4Axis2Rev.timeUp() < Shed_ms || st4Axis1Rev.timeUp() < Shed_ms || st4Axis1Fwd.timeUp() < Shed_ms) ) {
+      if (altModeA && (st4Axis2Fwd.timeUp() < Shed_ms || st4Axis2Rev.timeUp() < Shed_ms || st4Axis1Rev.timeUp() < Shed_ms || st4Axis1Fwd.timeUp() < Shed_ms) ) {
 
         if (altModeA) {
           uint8_t currentRateSelect = ((uint8_t)guide.settings.axis1RateSelect) & 0b11111110;
@@ -172,67 +181,12 @@
             mountStatus.soundClick();
           }
         }
-
-        if (altModeB) {
-          #if ST4_HAND_CONTROL_FOCUSER == ON
-            const char moveSlow[2][8] = {":F12#", ":F22#"};
-            const char moveFast[2][8] = {":F14#", ":F24#"};
-            const char moveIn[2][8]   = {":F1-#", ":F2-#"};
-            const char moveOut[2][8]  = {":F1+#", ":F2+#"};
-            static int fs = 0;
-            static int fn = 0;
-            static int focuserNumber = 0;
-
-            // select focuser 1 or 2
-            if (!fn && !fs) {
-              if (st4Axis1Fwd.wasPressed() && !st4Axis1Rev.wasPressed()) { focuserNumber = 1; mountStatus.soundClick(); }
-              if (st4Axis1Rev.wasPressed() && !st4Axis1Fwd.wasPressed()) { focuserNumber = 0; mountStatus.soundClick(); }
-            }
-
-            // move selected focuser out
-            if (!fn) {
-              if (st4Axis2Rev.isDown() && st4Axis2Fwd.isUp()) {
-                if (fs == 0) { SERIAL_LOCAL.transmit(moveSlow[focuserNumber]); fs++; } else
-                if (fs == 1) { SERIAL_LOCAL.transmit(moveIn[focuserNumber]); fs++; } else
-                if (fs == 2 && st4Axis2Rev.timeDown() > 4000) { SERIAL_LOCAL.transmit(moveFast[focuserNumber]); fs++; } else
-                if (fs == 3) { SERIAL_LOCAL.transmit(moveIn[focuserNumber]); fs++; }
-              }
-              if (st4Axis2Rev.isUp()) { if (fs > 0) { SERIAL_LOCAL.transmit(":F1Q#:F2Q#"); fs = 0; } }
-            }
-
-            // move selected focuser in
-            if (!fs) {
-              if (st4Axis2Fwd.isDown() && st4Axis2Rev.isUp()) {
-                if (fn == 0) { SERIAL_LOCAL.transmit(moveSlow[focuserNumber]); fn++; } else
-                if (fn == 1) { SERIAL_LOCAL.transmit(moveOut[focuserNumber]); fn++; } else
-                if (fn == 2 && st4Axis2Fwd.timeDown() > 4000) { SERIAL_LOCAL.transmit(moveFast[focuserNumber]); fn++; } else
-                if (fn == 3) { SERIAL_LOCAL.transmit(moveOut[focuserNumber]); fn++; }
-              }
-              if (st4Axis2Fwd.isUp()) { if (fn > 0) { SERIAL_LOCAL.transmit(":F1Q#:F2Q#"); fn = 0; } }
-            }
-          #else
-            // select next user catalog item
-            if (st4Axis1Fwd.wasPressed() && !st4Axis1Rev.wasPressed()) { SERIAL_LOCAL.transmit(":LN#"); mountStatus.soundClick(); }
-
-            // select previous user catalog item
-            if (st4Axis1Rev.wasPressed() && !st4Axis1Fwd.wasPressed()) { SERIAL_LOCAL.transmit(":LB#"); mountStatus.soundClick(); }
-
-            // goto user catalog item
-            if (st4Axis2Fwd.wasPressed() && !st4Axis2Rev.wasPressed()) { SERIAL_LOCAL.transmit(":LIG#"); mountStatus.soundClick(); }
-
-            // turn sound on/off
-            if (st4Axis2Rev.wasPressed() && !st4Axis2Fwd.wasPressed()) { mountStatus.soundClick(); mountStatus.soundToggleEnable(); mountStatus.soundClick(); }
-          #endif
-        }
       } else {
-        if (altModeA || altModeB) {
-          #if ST4_HAND_CONTROL_FOCUSER == ON
-            SERIAL_LOCAL.transmit(":F1Q#:F2Q#");
-          #endif
+        if (altModeA) {
           altModeA = false;
-          altModeB = false;
           mountStatus.soundBeep();
         }
+      }
     #endif
 
     if (mount.isEnabled()) {
@@ -272,10 +226,6 @@
       }
 
     }
-
-    #if ST4_HAND_CONTROL == ON
-    }
-    #endif
   }
 
   #if ST4_HAND_CONTROL == ON
